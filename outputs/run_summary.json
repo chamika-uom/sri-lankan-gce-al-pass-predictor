@@ -1,0 +1,40 @@
+{
+  "rows": 80000,
+  "features": [
+    "stream",
+    "syllabus",
+    "sub1",
+    "sub1_r",
+    "sub2",
+    "sub2_r",
+    "sub3",
+    "sub3_r"
+  ],
+  "best_model": "XGBoost",
+  "metrics": [
+    {
+      "model": "Random Forest",
+      "accuracy": 0.74525,
+      "precision_macro": 0.745970012371497,
+      "recall_macro": 0.7498758572201821,
+      "f1_macro": 0.7444122953236918,
+      "roc_auc": 0.8252696724078415
+    },
+    {
+      "model": "XGBoost",
+      "accuracy": 0.749625,
+      "precision_macro": 0.7461345084347151,
+      "recall_macro": 0.7483917318749637,
+      "f1_macro": 0.7469006224816817,
+      "roc_auc": 0.8323707902262611
+    },
+    {
+      "model": "CatBoost",
+      "accuracy": 0.746625,
+      "precision_macro": 0.7522289219696902,
+      "recall_macro": 0.7550184163115103,
+      "f1_macro": 0.7464279705710708,
+      "roc_auc": 0.8319015559186071
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "random_forest_best_params": {
+    "model__n_estimators": 200,
+    "model__min_samples_leaf": 2,
+    "model__max_features": "sqrt",
+    "model__max_depth": 18
+  },
+  "xgboost_best_params": {
+    "model__subsample": 0.75,
+    "model__n_estimators": 280,
+    "model__max_depth": 7,
+    "model__learning_rate": 0.04,
+    "model__colsample_bytree": 0.75
+  }
+}

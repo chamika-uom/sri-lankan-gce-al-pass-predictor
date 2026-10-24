@@ -1,0 +1,7 @@
+Left-out test row index: 32349
+Actual target: Non-pass
+Predicted target: Non-pass
+Predicted Pass probability: 0.216
+Input values:
+        stream syllabus       sub1 sub1_r                           sub2 sub2_r                  sub3 sub3_r
+32349  Unknown      new  GEOGRAPHY      F  HISTORY OF SRI LANKA & EUROPE      S  ISLAMIC CIVILIZATION      C
