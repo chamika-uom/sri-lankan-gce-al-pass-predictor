@@ -576,6 +576,7 @@ def build_report():
     add_link(doc, "GitHub repository", "https://github.com/chamika-uom/sri-lankan-gce-al-pass-predictor")
     add_link(doc, "Streamlit application", "https://sri-lankan-gce-al-pass-predictor-newcvcucpbcffyc7cfkabw.streamlit.app/")
 
+    doc.add_page_break()
     add_heading(doc, "Conclusion")
     add_paragraph(
         doc,
@@ -586,7 +587,6 @@ def build_report():
         "The results are limited to the sampled 2020 records and the available categorical features. Testing on a later cohort would help assess whether the performance is consistent. A future study aimed at early prediction would also need inputs collected before the examination results are released.",
     )
 
-    doc.add_page_break()
     add_heading(doc, "References")
     refs = [
         "Machine Learning Assignment Guidelines MSc in AI. Supplied course document.",
