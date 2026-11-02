@@ -29,12 +29,12 @@
       "roc_auc": 0.8323707902262611
     },
     {
-      "model": "CatBoost",
-      "accuracy": 0.746625,
-      "precision_macro": 0.7522289219696902,
-      "recall_macro": 0.7550184163115103,
-      "f1_macro": 0.7464279705710708,
-      "roc_auc": 0.8319015559186071
+      "model": "Categorical Naive Bayes",
+      "accuracy": 0.7394375,
+      "precision_macro": 0.7367910481588551,
+      "recall_macro": 0.7399139865161256,
+      "f1_macro": 0.737354159335156,
+      "roc_auc": 0.8145774389325475
     }
   ]
 }

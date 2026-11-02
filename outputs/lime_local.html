@@ -37089,25 +37089,25 @@
 /***/ })
 /******/ ]);
 //# sourceMappingURL=bundle.js.map </script></head><body>
-        <div class="lime top_div" id="top_div5F1XYXZ9GYPXZZ8"></div>
+        <div class="lime top_div" id="top_divYRJ9K4E5MZ25H9Z"></div>
         
         <script>
-        var top_div = d3.select('#top_div5F1XYXZ9GYPXZZ8').classed('lime top_div', true);
+        var top_div = d3.select('#top_divYRJ9K4E5MZ25H9Z').classed('lime top_div', true);
         
             var pp_div = top_div.append('div')
                                 .classed('lime predict_proba', true);
             var pp_svg = pp_div.append('svg').style('width', '100%');
-            var pp = new lime.PredictProba(pp_svg, ["Non-pass", "Pass"], [0.7202681931477288, 0.2797318068522712]);
+            var pp = new lime.PredictProba(pp_svg, ["Non-pass", "Pass"], [0.9441591375948168, 0.05584086240518203]);
             
         
         var exp_div;
             var exp = new lime.Explanation(["Non-pass", "Pass"]);
         
                 exp_div = top_div.append('div').classed('lime explanation', true);
-                exp.show([["stream=Unknown", 0.1520641829707351], ["sub1=GEOGRAPHY", 0.07603065193411288], ["sub3=ISLAMIC CIVILIZATION", 0.07344318302404461], ["syllabus=new", -0.05978124278644358], ["sub3_r=C", -0.04685539211712328], ["sub1_r=F", 0.009003686830065197], ["sub2_r=S", 0.007385475928878518], ["sub2=HISTORY OF SRI LANKA & EUROPE", 0.0028162038352603455]], 0, exp_div);
+                exp.show([["stream=Unknown", 0.14616867213114504], ["sub1=GEOGRAPHY", 0.1080850639137139], ["sub3=ISLAMIC CIVILIZATION", 0.09783933296437446], ["syllabus=new", -0.0875660328687556], ["sub2=HISTORY OF SRI LANKA & EUROPE", 0.07691053812930337], ["sub3_r=C", -0.0472031162798115], ["sub2_r=S", -0.04019738308895574], ["sub1_r=F", -0.013021634101726508]], 0, exp_div);
                 
         var raw_div = top_div.append('div');
-            exp.show_raw_tabular([["stream=Unknown", "True", 0.1520641829707351], ["sub1=GEOGRAPHY", "True", 0.07603065193411288], ["sub3=ISLAMIC CIVILIZATION", "True", 0.07344318302404461], ["syllabus=new", "True", -0.05978124278644358], ["sub3_r=C", "True", -0.04685539211712328], ["sub1_r=F", "True", 0.009003686830065197], ["sub2_r=S", "True", 0.007385475928878518], ["sub2=HISTORY OF SRI LANKA & EUROPE", "True", 0.0028162038352603455]], 0, raw_div);
+            exp.show_raw_tabular([["stream=Unknown", "True", 0.14616867213114504], ["sub1=GEOGRAPHY", "True", 0.1080850639137139], ["sub3=ISLAMIC CIVILIZATION", "True", 0.09783933296437446], ["syllabus=new", "True", -0.0875660328687556], ["sub2=HISTORY OF SRI LANKA & EUROPE", "True", 0.07691053812930337], ["sub3_r=C", "True", -0.0472031162798115], ["sub2_r=S", "True", -0.04019738308895574], ["sub1_r=F", "True", -0.013021634101726508]], 0, raw_div);
         
         </script>
         </body></html>

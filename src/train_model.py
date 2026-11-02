@@ -14,7 +14,6 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import shap
-from catboost import CatBoostClassifier
 from sklearn.compose import ColumnTransformer
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.impute import SimpleImputer
@@ -28,8 +27,9 @@ from sklearn.metrics import (
     roc_auc_score,
 )
 from sklearn.model_selection import RandomizedSearchCV, train_test_split
+from sklearn.naive_bayes import CategoricalNB
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.preprocessing import FunctionTransformer, OneHotEncoder, OrdinalEncoder, StandardScaler
 from xgboost import XGBClassifier
 
 warnings.filterwarnings("ignore")
@@ -78,18 +78,34 @@ def make_one_hot_pipeline(model):
     return Pipeline(steps=[("preprocess", preprocessor), ("model", model)])
 
 
-def make_catboost():
-    return CatBoostClassifier(
-        iterations=260,
-        depth=6,
-        learning_rate=0.08,
-        l2_leaf_reg=4.0,
-        loss_function="Logloss",
-        eval_metric="AUC",
-        auto_class_weights="Balanced",
-        random_seed=SEED,
-        verbose=False,
-        allow_writing_files=False,
+def shift_ordinal_codes(values):
+    """Reserve code 0 for unseen categories so CategoricalNB can accept them."""
+    return np.asarray(values, dtype=int) + 1
+
+
+def make_categorical_nb_pipeline():
+    """Encode each categorical column as an integer category for CategoricalNB."""
+    preprocessor = ColumnTransformer(
+        transformers=[
+            (
+                "categorical",
+                Pipeline(
+                    steps=[
+                        ("imputer", SimpleImputer(strategy="most_frequent")),
+                        ("ordinal", OrdinalEncoder(handle_unknown="use_encoded_value", unknown_value=-1)),
+                    ]
+                ),
+                FEATURES,
+            )
+        ],
+        remainder="drop",
+    )
+    return Pipeline(
+        steps=[
+            ("preprocess", preprocessor),
+            ("shift_codes", FunctionTransformer(shift_ordinal_codes, validate=False)),
+            ("model", CategoricalNB(alpha=1.0)),
+        ]
     )
 
 
@@ -141,10 +157,7 @@ def tune_models(X_train, y_train):
 def fit_and_score(models, X_train, X_test, y_train, y_test):
     results = []
     for name, model in models.items():
-        if name == "CatBoost":
-            model.fit(X_train, y_train, cat_features=list(range(len(FEATURES))))
-        else:
-            model.fit(X_train, y_train)
+        model.fit(X_train, y_train)
         pred = np.asarray(model.predict(X_test)).reshape(-1)
         prob = model.predict_proba(X_test)[:, 1]
         results.append(
@@ -192,15 +205,41 @@ def make_metric_plot(metrics):
     plt.close()
 
 
-def explain_with_shap(cat_model, X_test):
-    sample = X_test.sample(n=min(220, len(X_test)), random_state=SEED)
-    values = shap.TreeExplainer(cat_model).shap_values(sample)
-    if isinstance(values, list):
-        values = values[1]
-    values = np.asarray(values)
+def explain_with_shap(nb_model, X_test):
+    sample = X_test.sample(n=min(120, len(X_test)), random_state=SEED)
+    background = X_test.sample(n=min(40, len(X_test)), random_state=SEED + 1)
+
+    # SHAP's tabular masker needs numeric values.  The model still receives
+    # the original category labels after this small explanation-only encoding.
+    categories = {}
+    for col in FEATURES:
+        categories[col] = sorted(X_test[col].astype(str).unique().tolist())
+    code_maps = {col: {value: i for i, value in enumerate(values)} for col, values in categories.items()}
+
+    def encode(frame):
+        encoded = pd.DataFrame(index=frame.index)
+        for col in FEATURES:
+            encoded[col] = frame[col].astype(str).map(code_maps[col]).fillna(0).astype(float)
+        return encoded.to_numpy()
+
+    def decode(values):
+        decoded = pd.DataFrame(index=range(len(values)))
+        for i, col in enumerate(FEATURES):
+            indices = np.clip(np.rint(values[:, i]).astype(int), 0, len(categories[col]) - 1)
+            decoded[col] = [categories[col][j] for j in indices]
+        return decoded
+
+    def predict_fn(values):
+        return nb_model.predict_proba(decode(values))[:, 1]
+
+    # CategoricalNB is not a tree model, so a model-agnostic SHAP explainer is used.
+    # With eight features and a small background sample this remains practical on a laptop.
+    explainer = shap.Explainer(predict_fn, encode(background), feature_names=FEATURES)
+    explanation = explainer(encode(sample))
+    values = np.asarray(explanation.values)
     if values.ndim == 3:
-        values = values[:, :, 1]
-    shap.summary_plot(values, sample, plot_type="bar", show=False, max_display=10)
+        values = values[:, :, 0]
+    shap.summary_plot(values, feature_names=FEATURES, plot_type="bar", show=False, max_display=10)
     plt.tight_layout()
     plt.savefig(OUTPUT_DIR / "shap_summary.png", dpi=160, bbox_inches="tight")
     plt.close()
@@ -211,7 +250,7 @@ def explain_with_shap(cat_model, X_test):
     )
 
 
-def explain_with_lime(cat_model, X_train, X_test):
+def explain_with_lime(nb_model, X_train, X_test):
     categories = {}
     train_codes = pd.DataFrame(index=X_train.index)
     for col in FEATURES:
@@ -227,7 +266,7 @@ def explain_with_lime(cat_model, X_train, X_test):
         return decoded
 
     def predict_fn(values):
-        return cat_model.predict_proba(decode(values))
+        return nb_model.predict_proba(decode(values))
 
     explainer = lime.lime_tabular.LimeTabularExplainer(
         train_codes.values,
@@ -259,7 +298,7 @@ def main():
     models = {
         "Random Forest": rf_search.best_estimator_,
         "XGBoost": xgb_search.best_estimator_,
-        "CatBoost": make_catboost(),
+        "Categorical Naive Bayes": make_categorical_nb_pipeline(),
     }
     metrics = fit_and_score(models, X_train, X_test, y_train, y_test)
     make_metric_plot(metrics)
@@ -279,8 +318,8 @@ def main():
     plt.close()
     (OUTPUT_DIR / "classification_report.txt").write_text(classification_report(y_test, pred, zero_division=0), encoding="utf-8")
 
-    explain_with_shap(models["CatBoost"], X_test)
-    explain_with_lime(models["CatBoost"], X_train, X_test)
+    explain_with_shap(models["Categorical Naive Bayes"], X_test)
+    explain_with_lime(models["Categorical Naive Bayes"], X_train, X_test)
 
     inference_row = X_test.iloc[[0]]
     actual = "Pass" if y_test.iloc[0] == 1 else "Non-pass"

@@ -10,3 +10,8 @@ env/
 tmp/
 output/
 video/
+
+# Assignment documents and local document review files
+*.docx
+*.pdf
+.report_revision/

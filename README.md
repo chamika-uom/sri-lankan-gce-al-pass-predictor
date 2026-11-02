@@ -46,11 +46,11 @@ The training script creates:
 
 1. Random Forest: one-hot encoding, frequent-value imputation and sparse standardisation.
 2. XGBoost: the same one-hot pipeline, with manually selected boosting parameters.
-3. CatBoost: native categorical processing with manually selected parameters.
+3. Categorical Naive Bayes: ordinal category encoding with Laplace smoothing.
 
-The parameters are intentionally written in the code rather than relying on defaults. A small `RandomizedSearchCV` step tunes Random Forest and XGBoost using macro F1 on a training subset. CatBoost is configured using the selected final settings and compared on the same test set.
+The parameters are intentionally written in the code rather than relying on defaults. A small `RandomizedSearchCV` step tunes Random Forest and XGBoost using macro F1 on a training subset. Categorical Naive Bayes uses an explicit smoothing value and is compared on the same test set.
 
-Tree models do not require numeric scaling for their splits. The one-hot pipelines still include `StandardScaler(with_mean=False)` to demonstrate a safe sparse scaling step; CatBoost is left in native categorical form because that is its main strength.
+Tree models do not require numeric scaling for their splits. The one-hot pipelines still include `StandardScaler(with_mean=False)` to demonstrate a safe sparse scaling step. Categorical Naive Bayes receives non-negative integer codes for the categories, with unseen categories reserved as code zero.
 
 ## Sources
 
